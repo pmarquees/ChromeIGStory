@@ -92,7 +92,9 @@ function injectStoryTray(response) {
   
   // inject Story tray above Instagram feed
   var instagramFeed = document.getElementsByClassName(INSTAGRAM_FEED_CLASS_NAME)[0];
-  instagramFeed.insertBefore(trayContainer, instagramFeed.childNodes[0]);
+  if(instagramFeed) {
+    instagramFeed.insertBefore(trayContainer, instagramFeed.childNodes[0]);
+  }
 }
 
 // used to initialize and show the Story image gallery
