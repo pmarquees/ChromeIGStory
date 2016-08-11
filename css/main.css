@@ -20,4 +20,8 @@
   display: block;
   text-align: center;
   margin-bottom: 20px;
+  max-height: 78px;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
 }
