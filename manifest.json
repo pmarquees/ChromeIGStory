@@ -15,8 +15,8 @@
   "content_scripts": [
     {
       "matches": ["*://*.instagram.com/"],
-      "js": ["js/injectStoryTray.js", "js/jquery-3.1.0.min.js", "js/photoswipe.min.js", "js/photoswipe-ui-default.min.js", "js/moment.min.js"],
-      "css" : ["css/main.css", "css/photoswipe.css", "css/default-skin/default-skin.css"]
+      "js": ["js/injectStoryTray.js", "js/jquery-3.1.0.min.js", "js/FileSaver.min.js", "js/jszip.min.js", "js/jszip-utils.min.js", "js/jquery.contextMenu.min.js", "js/photoswipe.min.js", "js/photoswipe-ui-default.min.js", "js/moment.min.js"],
+      "css" : ["css/main.css", "css/jquery.contextMenu.min.css", "css/photoswipe.css", "css/default-skin/default-skin.css"]
     }
   ],
   "web_accessible_resources": [

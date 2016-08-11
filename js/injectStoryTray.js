@@ -79,10 +79,10 @@ function injectStoryTray(response) {
       var picture = user['profile_pic_url'];
       
       var trayItemImage = document.createElement('img');
-      trayItemImage.setAttribute("id", "trayItemImage");
+      trayItemImage.setAttribute("id", "trayItemImage" + i);
       trayItemImage.width = 64;
       trayItemImage.height = 64;
-      trayItemImage.setAttribute("class", (trayItem.items) ? "unseenStoryItem" : "seenStoryItem");
+      trayItemImage.setAttribute("class", ((trayItem.items) ? "unseenStoryItem" : "seenStoryItem") + " trayItemImage");
       trayItemImage.src = picture.replace("http://", "https://");
       trayItemImage.title = user.username;
       
@@ -101,6 +101,33 @@ function injectStoryTray(response) {
         }
       });
       
+      // right click context menu for downloading Story
+      (function(i) {
+        $(function() {
+          $.contextMenu({
+            selector: '#trayItemImage' + i, 
+            callback: function(key, options) {
+              if(trayItem.items) {
+                // if there are new Story images available, download them
+                downloadStory(trayItem);
+              } else {
+                // retrieve the user's Story and download it
+                return getStory(trayItem.id).then(function(story) {
+                  downloadStory(story);
+                }, function(error) {
+                  alert("There was an error trying to download this person's Story.");
+                  console.log("Error downloading Story for user: " + JSON.stringify(error));
+                });
+              }    
+            },
+            items: {
+              "download": {name: "Download Story"}
+            }
+          });
+          
+        });
+      })(i);
+      
       trayContainer.appendChild(trayItemImage);
       
     })(trayItem);
@@ -112,6 +139,56 @@ function injectStoryTray(response) {
   if(instagramFeed) {
     instagramFeed.insertBefore(trayContainer, instagramFeed.childNodes[0]);
   }
+}
+
+// downloads a zip file containing the user's Story
+function downloadStory(trayItem) {
+  var zip = new JSZip();
+  trayItem.items.map((storyItem, i) => {
+    var mediaItemUrl = getMediaItemUrl(storyItem);
+    // downloads each Story image/video and adds it to the zip file
+    zip.file(getStoryFileName(storyItem, mediaItemUrl), urlToPromise(mediaItemUrl), {binary:true});
+  });
+  // generate zip file and start download
+  zip.generateAsync({type:"blob"})
+  .then(function(content) {
+    saveAs(content, getZipFileName(trayItem));
+  });
+}
+
+// promises to download the file before zipping it
+function urlToPromise(url) {
+  return new Promise(function(resolve, reject) {
+    JSZipUtils.getBinaryContent(url, function (err, data) {
+      if(err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+}
+
+// returns the name of the zip file to download with format: (username-timestamp.zip)
+function getZipFileName(trayItem) {
+  return trayItem.user.username + "-" + moment().format() + ".zip";
+}
+
+// returns the name of the image/video file to add to the zip file
+function getStoryFileName(storyItem, mediaItemUrl) {
+  return storyItem['id'] + (((mediaItemUrl.includes(".mp4")) ? ".mp4" : ".jpg"));
+}
+
+// returns an optimized URL format for the image/video
+function getMediaItemUrl(storyItem) {
+  var mediaItem;
+  if(storyItem['video_versions']) {
+    mediaItem = storyItem['video_versions'][0];
+  } else {
+    mediaItem = storyItem['image_versions2']['candidates'][0];
+  }
+  var secureUrl = mediaItem['url'].replace("http://", "https://");
+  return secureUrl.split("?")[0]; // leave out ig_cache_key
 }
 
 // used to initialize and show the Story image gallery

@@ -8,7 +8,7 @@
   border-color: gray;
 }
 
-#trayItemImage {
+.trayItemImage {
   border-radius: 50%;
   margin-left: 5px;
   margin-right: 5px;
