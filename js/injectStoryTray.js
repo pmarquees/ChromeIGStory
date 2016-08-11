@@ -3,7 +3,22 @@ var INSTAGRAM_FEED_CLASS_NAME = "_qj7yb";
 
 // BEGIN INJECTION
 injectPswpContainer();
-getStories();
+loadStories();
+
+// listen for background.js to send over cookies so we are clear to make requests
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    var instagramCookies = JSON.parse(request);    
+    // only fetch stories if the cookies are available
+    if((instagramCookies.ds_user_id && instagramCookies.sessionid)) {
+      getStories();
+    } 
+  });
+
+// tell background.js to load cookies so we can check if they are available before we make requests
+function loadStories() {
+  chrome.runtime.sendMessage('loadStories');
+}
 
 // ping Instagram API for new Stories in tray
 function getStories() {
@@ -12,7 +27,9 @@ function getStories() {
   xhr.withCredentials = true;
   xhr.onreadystatechange = function() {
     if (xhr.readyState == 4) {
-      injectStoryTray(JSON.parse(xhr.responseText));
+      if(xhr.status == 200) {
+        injectStoryTray(JSON.parse(xhr.responseText));
+      }
     }
   }
   xhr.send();

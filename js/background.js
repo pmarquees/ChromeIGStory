@@ -10,6 +10,20 @@ var DOMAIN_URL = "https://www.instagram.com";
 
 loadCookies();
 
+// listen for injectStoryTray.js to send us a message so we can send back cookies
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    if (request === "loadStories") {
+      getCookies(function(cookies) {
+        instagramCookies = cookies;  
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+          // send back cookies so we can check if they are available before we make requests
+          chrome.tabs.sendMessage(tabs[0].id, JSON.stringify(cookies));
+        });
+      });
+    }
+  });
+
 function loadCookies() {
   getCookies(function(cookies) {
     instagramCookies = cookies;  
@@ -33,8 +47,6 @@ function getCookies(callback) {
 // hook into web request and modify headers before sending the request
 chrome.webRequest.onBeforeSendHeaders.addListener(
   function(info) {
-    loadCookies();
-    
     var headers = info.requestHeaders;
     var shouldInjectHeaders = true;
     
@@ -43,14 +55,18 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
       shouldInjectHeaders = false;
     }
     
-    // if the referer isn't the main page, don't tamper with the headers and inject the auth cookies
     if(shouldInjectHeaders) {
       for (var i = 0; i < headers.length; i++) {
         var header = headers[i];
+        // if the referer isn't the main page, don't tamper with the headers and inject the auth cookies
         if(header.name.toLowerCase() == 'referer') {
           if(header.value != "https://www.instagram.com/") {
             shouldInjectHeaders = false;
           }
+        }
+        // don't inject headers if an internal XMLHttpRequest is made (i.e. clicking the profile tab)
+        if(header.name.toLowerCase() == 'x-requested-with') {
+          shouldInjectHeaders = false;
         }
       }
     }
