@@ -1,0 +1,23 @@
+.unseenStoryItem {
+  background: -webkit-linear-gradient(left top, #a31391 0%, #f8a74f 100%);
+}
+
+.seenStoryItem {
+  border-style: solid;
+  border-width: 3px;
+  border-color: gray;
+}
+
+#trayItemImage {
+  border-radius: 50%;
+  margin-left: 5px;
+  margin-right: 5px;
+  padding: 3px;
+  cursor: pointer;
+}
+
+#trayContainer {
+  display: block;
+  text-align: center;
+  margin-bottom: 20px;
+}

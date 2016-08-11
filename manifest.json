@@ -3,10 +3,27 @@
   "description": "Chrome extension that lets you view your friend's Instagram Stories in the browser.",
   "version": "1.0",
   "manifest_version": 2,
-  "app": {
-    "background": {
-      "scripts": ["js/background.js"]
-    }
+  "background": {
+    "scripts": ["js/background.js"]
   },
+  "permissions": [
+    "cookies",
+    "webRequest",
+    "webRequestBlocking",
+    "*://*.instagram.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.instagram.com/*"],
+      "js": ["js/injectStoryTray.js", "js/jquery-3.1.0.min.js", "js/photoswipe.min.js", "js/photoswipe-ui-default.min.js", "js/moment.min.js"],
+      "css" : ["css/main.css", "css/photoswipe.css", "css/default-skin/default-skin.css"]
+    }
+  ],
+  "web_accessible_resources": [
+    "html/photoswipe.html",
+    "js/*",
+    "css/*"
+  ],
+  
   "icons": { "16": "icon-16.png", "128": "icon-128.png" }
 }
